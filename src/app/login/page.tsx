@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -17,14 +16,16 @@ export default function LoginPage() {
     if (isSignup) {
       const success = signup(email, password);
       if (success) {
-        window.location.href = "/";
+        
+        window.location.href = "/card";
       } else {
         setError("Signup failed. User limit reached or user already exists.");
       }
     } else {
       const success = login(email, password);
       if (success) {
-        window.location.href = "/";
+       
+        window.location.href = "/card";
       } else {
         setError("Invalid email or password");
       }

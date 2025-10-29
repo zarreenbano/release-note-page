@@ -1,13 +1,55 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect,useState} from 'react';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser, logout } from '@/lib/auth';
 import { CheckIcon } from '@heroicons/react/24/solid';
 
+interface ReleaseNote {
+  date: string;
+  version: string;
+  features: string[];
+  
+}
+
+
+
+
 export default function CardPage() {
   const router = useRouter();
   const user = getCurrentUser();
+    const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
+
+
+  useEffect(() => {
+    const saved = localStorage.getItem('releaseNotes');
+    if (saved) {
+      setReleaseNotes(JSON.parse(saved));
+    } else {
+      setReleaseNotes([
+        {
+          date: '2025-10-20',
+          version: 'Grok 4.2',
+          features: ['New voice mode', '2× usage', 'Faster API'],
+        },
+      ]);
+    }
+  }, []);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('releaseNotes');
+    if (saved) {
+      setReleaseNotes(JSON.parse(saved));
+    } else {
+      setReleaseNotes([
+        {
+          date: '2025-10-20',
+          version: 'Grok 4.2',
+          features: ['New voice mode', '2× usage', 'Faster API'],
+        },
+      ]);
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) router.replace('/login');
@@ -15,50 +57,8 @@ export default function CardPage() {
 
   if (!user) return null;
 
-  const releaseNotes = [
-    {
-      date: 'October 23, 2025',
-      title: 'Shared projects',
-      description:
-        'Starting today, project sharing is available to all ChatGPT users, including for Free, Plus, Pro, and Go users globally on web, iOS, and Android.',
-      details: [
-        'ChatGPT can draw from anything in the shared project — including chats, uploaded files and custom instructions — so responses are informed by your group’s internal knowledge, and you can pick up where others left off.',
-        'Shared projects are ideal for:',
-        '• Collaborative brainstorming',
-        '• Group research',
-        '• Team documentation',
-      ],
-    },
-    {
-      date: 'November 21, 2023',
-      title: 'Introducing the GPT Store and ChatGPT Team plan',
-      description: 'A changelog of the latest updates for ChatGPT',
-      details: [],
-    },
-    {
-      date: 'November 6, 2023',
-      title: 'ChatGPT with voice is available to all users',
-      description: 'Introducing GPTs',
-      details: [],
-    },
-    {
-      date: 'October 17, 2023',
-      title: 'Browsing is now out of beta',
-      description: 'DALL·E 3 is now rolling out in beta',
-      details: [],
-    },
-  ];
-
-  const sidebarItems = [
-    'November 21, 2023',
-    'ChatGPT with voice is available to all users',
-    'November 6, 2023',
-    'Introducing GPTs',
-    'October 17, 2023',
-    'Browsing is now out of beta',
-    'October 16, 2023',
-    'DALL·E 3 is now rolling out in beta',
-  ];
+ 
+  const sidebarItems = releaseNotes.map(note => note.date);
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
@@ -70,7 +70,7 @@ export default function CardPage() {
             <select className="text-sm bg-gray-900 text-white border border-gray-700 rounded px-3 py-1">
               <option>English (United States)</option>
             </select>
-            <button
+                     <button
               onClick={() => {
                 logout();
                 router.push('/login');
@@ -79,6 +79,12 @@ export default function CardPage() {
             >
               Log out
             </button>
+            <button
+  onClick={() => router.push('/editor')}
+  className="text-sm font-medium hover:underline mr-4"
+>
+  Edit
+</button>
           </div>
         </div>
       </header>
@@ -109,34 +115,25 @@ export default function CardPage() {
 
           {/* Release Notes */}
           <div className="mt-10 space-y-12">
-            {releaseNotes.map((note, idx) => (
-              <article key={idx} className="border-b border-gray-800 pb-12 last:border-0">
-                <time className="text-xl font-semibold text-white">
-                  {note.date}
-                </time>
+  {releaseNotes.map((note, idx) => (
+    <article key={idx} className="border-b border-gray-8 pb-12 last:border-0">
+      <time className="text-xl font-semibold text-white">
+        {note.date}
+      </time>
 
-                <h3 className="text-2xl font-bold mt-3 mb-2">{note.title}</h3>
+      <h3 className="text-2xl font-bold mt-3 mb-2">{note.version}</h3>
 
-                {note.description && (
-                  <p className="text-gray-300 leading-relaxed mb-4">
-                    {note.description}
-                  </p>
-                )}
-
-                {note.details.length > 0 && (
-                  <ul className="mt-4 space-y-2">
-                    {note.details.map((detail, i) => (
-                      <li key={i} className="flex items-start text-gray-300">
-                        <CheckIcon className="h-5 w-5 text-white mr-2 shrink-0 mt-0.5" />
-                        <span>{detail}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </article>
-            ))}
-          </div>
-        </main>
+      <ul className="mt-4 space-y-2">
+        {note.features.map((feat, i) => (
+          <li key={i} className="flex items-start text-gray-300">
+            <CheckIcon className="h-5 w-5 text-white mr-2 shrink-0 mt-0.5" />
+            <span>{feat}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  ))}
+</div> </main>
 
         {/* Right: Scrollable Sidebar */}
         <aside className="hidden lg:block w-64 shrink-0">
@@ -156,7 +153,7 @@ export default function CardPage() {
       </div>
 
       {/* Footer - User ID */}
-      <footer className="border-t border-gray-800 py-6 text-center text-sm text-gray-400">
+      <footer className=" mt-96 border-t border-gray-800 py-6 text-center text-sm text-gray-400">
         Logged in as{' '}
         <span className="font-medium text-white">User ID: {user.id}</span>
       </footer>
